@@ -1,118 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>My Personal Website</title>
-<style>
-  body, html {
-    margin: 0; padding: 0;
-    font-family: Arial, sans-serif;
-    scroll-behavior: smooth;
-  }
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    background: rgba(0,0,0,0.7);
-    height: 50px;
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    z-index: 1000;
-  }
-  nav a {
-    color: white;
-    margin-right: 20px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.3s;
-  }
-  nav a:hover {
-    color: #f0a500;
-  }
-  .hero {
-    position: relative;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    overflow: hidden;
-    scroll-snap-align: start;
-  }
-  .hero img {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: -1;
-  }
-  .hero h1 {
-    font-size: 3em;
-    margin: 0;
-  }
-  .hero p {
-    font-size: 1.5em;
-    margin: 10px 0 50px 0;
-    max-width: 80%;
-    text-align: center;
-  }
-  .scroll-down {
-    position: absolute;
-    bottom: 20px;
-    font-size: 2.5em;
-    color: white;
-    cursor: pointer;
-    animation: bounce 2s infinite;
-    user-select: none;
-  }
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0);}
-    50% { transform: translateY(10px);}
-  }
-  .content {
-    padding: 80px 20px 50px; 
-    background-color: #f9f9f9;
-    min-height: 100vh;
-    scroll-snap-align: start;
-  }
-  @media (max-width: 600px) {
-    .hero h1 {
-      font-size: 2em;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Personal Website</title>
+  <style>
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.8);
+      height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      z-index: 1000;
     }
-    .hero p {
-      font-size: 1.2em;
+    nav a {
+      color: white;
+      margin-right: 25px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1em;
+      padding: 6px 10px;
+      border-radius: 4px;
+      transition: background-color 0.3s, color 0.3s;
     }
-  }
-</style>
+    nav a:hover, nav a:focus {
+      background-color: #f0a500;
+      color: black;
+    }
+  </style>
 </head>
 <body>
+  <!-- 导航栏占位符 -->
+  <div id="nav-placeholder"></div>
 
-<nav>
-  <a href="#about">About</a>
-  <a href="#contact">Contact</a>
-</nav>
+  <section id="home" style="height:100vh; background: url('img.jpg') no-repeat center/cover; color:white; text-align:center; display:flex; flex-direction:column; justify-content:center; text-shadow: 2px 2px 5px rgba(0,0,0,0.8);">
+    <h1>Welcome to My World</h1>
+    <p>"Why borrow sorrow from tomorrow?"</p>
+  </section>
 
-<div class="hero">
-  <img src="img.jpg" alt="My Image" />
-  <h1>Welcome to My World</h1>
-  <p>“Why borrow sorrow from tomorrow?”</p>
-  <div class="scroll-down" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})" aria-label="Scroll Down">&#x25BC;</div>
-</div>
+  <section id="about" style="padding:80px 20px; min-height:100vh;">
+    <h2>About Me</h2>
+    <p>Hey, I'm Chengyi Gan. I'm a university student at Peking University...</p>
+  </section>
 
-<div class="content" id="about">
-  <h2>About Me</h2>
-  <p>Hey, I'm Chengyi Gan. I'm a university student at Peking University, focused on my studies and figuring things out day by day.
-I like keeping life straightforward—work hard, enjoy little moments, and keep moving forward.
-That's me in a nutshell.</p>
-</div>
+  <section id="contact" style="padding:80px 20px; min-height:100vh;">
+    <h2>Contact</h2>
+    <p>Email: fqdw@stu.pku.edu.cn</p>
+  </section>
 
-<div class="content" id="contact">
-  <h2>Contact</h2>
-  <p>email: fqdw@stu.pku.edu.cn.</p>
-</div>
-
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('nav.html')
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.text();
+        })
+        .then(data => {
+          document.getElementById('nav-placeholder').innerHTML = data;
+        })
+        .catch(err => {
+          console.error('ERROR:', err);
+          // 加载失败时显示默认导航
+          document.getElementById('nav-placeholder').innerHTML = `
+            <nav>
+              <a href="#home">Home</a>
+              <a href="#about">About</a>
+              <a href="#contact">Contact</a>
+            </nav>
+          `;
+        });
+    });
+  </script>
 </body>
 </html>

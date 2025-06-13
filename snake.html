@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Snake Game</title>
+<style>
+  body {
+    margin:0; background: #222; display:flex; flex-direction: column; align-items:center; color:#eee;
+    font-family: 'Arial', sans-serif;
+    user-select:none;
+  }
+  canvas {
+    background: #fff;
+    margin-top: 10px;
+    border: 2px solid #555;
+  }
+  #overlay, #gameover {
+    position: fixed; top:0; left:0; width:100vw; height:100vh;
+    background: rgba(0,0,0,0.8);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 10; flex-direction: column;
+    color: #eee;
+  }
+  #overlay > div, #gameover > div {
+    background: #333; padding: 20px 30px; border-radius: 12px; text-align:center;
+  }
+  button {
+    margin: 8px 12px;
+    padding: 10px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #f0a500;
+    color: black;
+  }
+  h1, h2 {
+    margin: 8px 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>Snake Game</h1>
+<canvas id="game" width="420" height="420"></canvas>
+
+<!-- 难度选择弹窗 -->
+<div id="overlay">
+  <div>
+    <h2>Select Difficulty</h2>
+    <button data-speed="140" data-monsters="7" data-reverse="false">Easy</button>
+    <button data-speed="60" data-monsters="9" data-reverse="false">Moderate</button>
+    <button data-speed="30" data-monsters="11" data-reverse="false">Difficult</button>
+    <button data-speed="90" data-monsters="14" data-reverse="true" style="background:black;color:white;">Hell (Reverse)</button>
+    <p style="margin-top:15px; font-size:0.9em; color:#ccc;">Use WASD keys to move the snake</p>
+  </div>
+</div>
+
+<!-- 游戏结束弹窗 -->
+<div id="gameover" style="display:none;">
+  <div>
+    <h2>Game Over</h2>
+    <p id="gameover-msg">Your snake died!</p>
+    <button id="restart-btn" style="background:green; color:white;">Try Again</button>
+    <button id="stop-btn" style="background:red; color:white;">Stop</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const blockSize = 10;
+  const widthBlocks = canvas.width / blockSize;
+  const heightBlocks = canvas.height / blockSize;
+  const wallThickness = 1; // 墙的厚度为1个方块
+
+  let snake = [];
+  let apple = {x:0, y:0};
+  let monsters = [];
+  let dx = 0, dy = 1; // 初始向下（因为y轴正方向向下）
+  let speed = 60;
+  let reverse = false;
+  let timerId = null;
+
+  const overlay = document.getElementById('overlay');
+  const gameoverDiv = document.getElementById('gameover');
+  const restartBtn = document.getElementById('restart-btn');
+  const stopBtn = document.getElementById('stop-btn');
+
+  // 初始化蛇位置，头是数组最后一个元素
+  function initSnake() {
+    snake = [];
+    // 初始位置放在中间区域，远离边界
+    const startX = Math.floor(widthBlocks / 2);
+    const startY = Math.floor(heightBlocks / 2);
+    for(let i=5; i>=0; i--) {
+      snake.push({x: startX - i, y: startY});
+    }
+  }
+
+  // 生成怪物随机坐标，确保不在墙内
+  function initMonsters(num) {
+    monsters = [];
+    while(monsters.length < num) {
+      const mx = randInt(wallThickness, widthBlocks - wallThickness - 1);
+      const my = randInt(wallThickness, heightBlocks - wallThickness - 1);
+      if (!isOccupied(mx, my)) {
+        monsters.push({x: mx, y: my});
+      }
+    }
+  }
+
+  // 判断某格是否被蛇或怪物占用
+  function isOccupied(x, y) {
+    return snake.some(p => p.x === x && p.y === y) || monsters.some(m => m.x === x && m.y === y);
+  }
+
+  // 生成苹果随机坐标，且不与怪物重叠，也不在墙内
+  function placeApple() {
+    do {
+      apple.x = randInt(wallThickness, widthBlocks - wallThickness - 1);
+      apple.y = randInt(wallThickness, heightBlocks - wallThickness - 1);
+    } while (monsters.some(m => m.x === apple.x && m.y === apple.y) || snake.some(s => s.x === apple.x && s.y === apple.y));
+  }
+
+  // 随机整数[min, max]
+  function randInt(min, max) {
+    return Math.floor(Math.random()*(max - min + 1)) + min;
+  }
+
+  // 画背景
+  function drawBackground() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    // 绘制游戏区域，留出墙的厚度
+    ctx.fillRect(
+      wallThickness * blockSize, 
+      wallThickness * blockSize, 
+      canvas.width - 2 * wallThickness * blockSize, 
+      canvas.height - 2 * wallThickness * blockSize
+    );
+  }
+
+  // 画方块，左上角坐标
+  function drawSquare(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x*blockSize, y*blockSize, blockSize, blockSize);
+  }
+
+  // 画蛇（蓝色方块）
+  function drawSnake() {
+    snake.forEach(part => {
+      drawSquare(part.x, part.y, 'blue');
+    });
+  }
+
+  // 画苹果（emoji）
+  function drawApple() {
+    ctx.font = '18px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🍎', apple.x * blockSize + blockSize/2, apple.y * blockSize + blockSize/2 + 2);
+  }
+
+  // 画怪物（emoji）
+  function drawMonsters() {
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    monsters.forEach(m => {
+      ctx.fillText('👾', m.x * blockSize + blockSize/2, m.y * blockSize + blockSize/2 + 2);
+    });
+  }
+
+  // 游戏结束显示信息
+  function showGameOver() {
+    gameoverDiv.style.display = 'flex';
+  }
+
+  // 隐藏游戏结束弹窗
+  function hideGameOver() {
+    gameoverDiv.style.display = 'none';
+  }
+
+  // 游戏主循环
+  function gameLoop() {
+    // 新头坐标
+    const head = snake[snake.length - 1];
+    const newHead = {x: head.x + dx, y: head.y + dy};
+
+    // 撞墙检测（边界不能超过墙的厚度）
+    if(newHead.x < wallThickness || newHead.x >= widthBlocks - wallThickness || 
+       newHead.y < wallThickness || newHead.y >= heightBlocks - wallThickness) {
+      endGame();
+      return;
+    }
+
+    // 撞自己检测
+    if(snake.some(p => p.x === newHead.x && p.y === newHead.y)) {
+      endGame();
+      return;
+    }
+
+    // 撞怪物检测
+    if(monsters.some(m => m.x === newHead.x && m.y === newHead.y)) {
+      endGame();
+      return;
+    }
+
+    snake.push(newHead);
+
+    // 吃苹果逻辑
+    if(newHead.x === apple.x && newHead.y === apple.y) {
+      placeApple(); // 生成新苹果
+    } else {
+      snake.shift(); // 不吃苹果去尾
+    }
+
+    // 绘制
+    drawBackground();
+    drawApple();
+    drawSnake();
+    drawMonsters();
+
+    timerId = setTimeout(gameLoop, speed);
+  }
+
+  // 结束游戏
+  function endGame() {
+    clearTimeout(timerId);
+    showGameOver();
+  }
+
+  // 初始化并开始游戏
+  function startGame(chosenSpeed, monsterCount, isReverse) {
+    speed = chosenSpeed;
+    reverse = isReverse;
+
+    dx = 0;
+    dy = 1;
+    initSnake();
+    initMonsters(monsterCount);
+    placeApple();
+    hideGameOver();
+    drawBackground();
+    drawApple();
+    drawSnake();
+    drawMonsters();
+
+    if(timerId) clearTimeout(timerId);
+    timerId = setTimeout(gameLoop, speed);
+  }
+
+  // 按键处理，根据是否反转映射WASD键
+  function handleKeyDown(e) {
+    const key = e.key.toLowerCase();
+    // 正常映射
+    const normalMapping = {
+      w: [0, -1],
+      s: [0, 1],
+      a: [-1, 0],
+      d: [1, 0],
+    };
+    // 反转映射
+    const reverseMapping = {
+      w: [0, 1],
+      s: [0, -1],
+      a: [1, 0],
+      d: [-1, 0],
+    };
+
+    let mapping = reverse ? reverseMapping : normalMapping;
+
+    if(key in mapping) {
+      const [newDx, newDy] = mapping[key];
+      // 禁止180度转向
+      if(dx !== -newDx || dy !== -newDy) {
+        dx = newDx;
+        dy = newDy;
+      }
+    }
+  }
+
+  // 绑定难度按钮事件
+  overlay.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const spd = parseInt(btn.getAttribute('data-speed'));
+      const mons = parseInt(btn.getAttribute('data-monsters'));
+      const rev = btn.getAttribute('data-reverse') === 'true';
+      overlay.style.display = 'none';
+      startGame(spd, mons, rev);
+    });
+  });
+
+  // 游戏结束按钮事件
+  restartBtn.onclick = () => {
+    overlay.style.display = 'none';
+    hideGameOver();
+    startGame(speed, monsters.length, reverse);
+  };
+  stopBtn.onclick = () => {
+    hideGameOver();
+    overlay.style.display = 'flex';
+  };
+
+  // 监听键盘事件
+  window.addEventListener('keydown', handleKeyDown);
+
+  // 提示
+  ctx.font = '20px Arial';
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'center';
+  ctx.fillText('Select difficulty to start', canvas.width/2, canvas.height/2);
+})();
+</script>
+
+</body>
+</html>

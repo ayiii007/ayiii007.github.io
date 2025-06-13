@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Micro Program Module</title>
+<style>
+  body {
+    font-family: Arial, sans-serif; margin: 20px;
+  }
+  h1 {
+    text-align: center;
+  }
+  iframe {
+    width: 100%;  /* 宽度撑满父容器 */
+    border: none;
+  }
+  .download-link {
+    display: block;
+    width: 200px;
+    margin: 20px auto;
+    padding: 10px 15px;
+    background-color: #f0a500;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+  }
+  .download-link:hover {
+    background-color: #d48806;
+  }
+</style>
+</head>
+<body>
+
+<h1>Micro Program Module</h1>
+
+<iframe id="snakeFrame" src="snake.html"></iframe>
+
+<a href="micro_program.zip" class="download-link" download>Download Snake Game ZIP</a>
+
+<script>
+  const iframe = document.getElementById('snakeFrame');
+  function resizeIframe() {
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframe.style.height = iframeDoc.body.scrollHeight + 'px';
+    } catch (e) {
+      // 跨域时可能会报错，忽略
+      iframe.style.height = '500px'; // 给个默认高度
+    }
+  }
+
+  iframe.onload = resizeIframe;
+  window.addEventListener('resize', resizeIframe);
+</script>
+
+</body>
+</html>
