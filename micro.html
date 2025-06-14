@@ -3,68 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Programs Index</title>
+    <title>Micro Programs</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background: #f5f5f5;
         }
+        nav {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
         h1 {
-            color: #333;
             text-align: center;
-            margin-bottom: 30px;
+            margin: 30px 0;
         }
         .program-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            list-style: none;
+            padding: 0;
         }
-        .program-card {
+        .program-item {
             background: white;
-            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .program-title {
-            font-size: 1.2em;
+            padding: 20px;
             margin-bottom: 15px;
-            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .program-link {
+        .program-name {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .program-links a {
             display: inline-block;
-            padding: 8px 15px;
-            background: #4CAF50;
-            color: white;
-            text-decoration: none;
+            padding: 8px 16px;
+            margin-left: 10px;
             border-radius: 4px;
-            margin-right: 10px;
-            margin-bottom: 10px;
+            text-decoration: none;
+            color: white;
+        }
+        .open-link {
+            background: #4CAF50;
         }
         .download-link {
-            display: inline-block;
-            padding: 8px 15px;
             background: #2196F3;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Available Programs</h1>
-    <div class="program-list">
-        
-        <div class="program-card">
-            <h3 class="program-title">Snake</h3>
-            <a href="programs\snake.html" class="program-link">Run Program</a>
-            <a href="programs\snake_game.zip" class="download-link" download>Download ZIP</a>
-        </div>
-        
+    <nav>
+  <a href="index.html#home">Home</a>
+  <a href="index.html#about">About</a>
+  <a href="photography.html">Photography</a>
+  <a href="blog/index.html">Blog</a>
+  <a href="reports.html">Reports</a>
+  <a href="micro.html">Micro Program</a>
+  <a href="index.html#contact">Contact</a>
+</nav>
+
+
+    <div class="container">
+        <h1>Micro Programs</h1>
+        <ul class="program-list">
+            
+            <li class="program-item">
+                <span class="program-name">2048</span>
+                <div class="program-links">
+                    <a href="programs\2048.html" class="open-link">Open</a>
+                    
+                </div>
+            </li>
+            
+            <li class="program-item">
+                <span class="program-name">Snake</span>
+                <div class="program-links">
+                    <a href="programs\snake.html" class="open-link">Open</a>
+                    <a href="programs\snake_game.zip" class="download-link" download>Download</a>
+                </div>
+            </li>
+            
+        </ul>
     </div>
 </body>
 </html>
-    
