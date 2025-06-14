@@ -166,18 +166,41 @@
             font-size: 14px;
             color: #776e65;
         }
-        #decay-alert {
+        #decay-alert, #instructions {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: white;
             padding: 20px;
             border-radius: 10px;
             z-index: 100;
             text-align: center;
+            max-width: 500px;
+            width: 80%;
+        }
+        #instructions {
+            text-align: left;
+            line-height: 1.6;
+        }
+        #instructions h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #ffeb3b;
+        }
+        #instructions ul {
+            padding-left: 20px;
+        }
+        #instructions li {
+            margin-bottom: 10px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -201,7 +224,10 @@
         <div id="current-equation">use the arrow keys or WASD to move the elements</div>
         
         <div id="grid"></div>
-        <button id="new-game-btn">new game</button>
+        <div class="button-group">
+            <button id="new-game-btn">new game</button>
+            <button id="instructions-btn">instructions</button>
+        </div>
         <div class="controls">control: ↑↓←→ or WASD</div>
     </div>
     
@@ -243,6 +269,44 @@
 <div id="decay-alert">
     <div id="decay-message"></div>
     <button id="continue-btn">Continue</button>
+</div>
+
+<div id="instructions">
+    <h2>Nuclear Fusion 2048 - Game Instructions</h2>
+    
+    <h3>Objective</h3>
+    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the element ⁵⁶Fe before the grid fills up.</p>
+    
+    <h3>How to Play</h3>
+    <ul>
+        <li><strong>Move elements</strong> using arrow keys or WASD</li>
+        <li><strong>Combine adjacent elements</strong> according to the fusion equations shown in the sidebar</li>
+        <li>When two combinable elements merge, they create a new heavier element and you earn points</li>
+        <li>Some unstable elements will decay over time into lighter elements</li>
+    </ul>
+    
+    <h3>Special Elements</h3>
+    <ul>
+        <li><strong>Unstable elements</strong> (marked with a yellow number) will decay after a certain number of moves</li>
+        <li><strong>⁵⁶Ni</strong> is the final element that decays into stable ⁵⁶Fe</li>
+    </ul>
+    
+    <h3>Scoring</h3>
+    <ul>
+        <li>Base score: 10 points per fusion</li>
+        <li>Bonus: +1 point per atomic mass unit of the created element</li>
+    </ul>
+    
+    <h3>Tips</h3>
+    <ul>
+        <li>Plan your moves to create chains of reactions</li>
+        <li>Keep an eye on unstable elements - they might decay before you can use them</li>
+        <li>Try to avoid creating ²⁴Mg because it is of no use in creating ⁵⁶Fe</li>
+    </ul>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button id="close-instructions">Got it!</button>
+    </div>
 </div>
 
 <script>
@@ -673,6 +737,12 @@
         document.getElementById('restart-btn').addEventListener('click', initGame);
         document.getElementById('continue-btn').addEventListener('click', () => {
             document.getElementById('decay-alert').style.display = 'none';
+        });
+        document.getElementById('instructions-btn').addEventListener('click', () => {
+            document.getElementById('instructions').style.display = 'block';
+        });
+        document.getElementById('close-instructions').addEventListener('click', () => {
+            document.getElementById('instructions').style.display = 'none';
         });
         
         // 键盘控制
