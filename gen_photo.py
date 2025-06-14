@@ -2,74 +2,71 @@ import os
 
 folder = "photos"
 output_file = "photography.html"
+nav_file = "nav.html"
+
 
 files = sorted([f for f in os.listdir(folder) if f.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".gif"))])
 
+with open(nav_file, "r", encoding="utf-8") as nav_f:
+    nav_content = nav_f.read()
+
 with open(output_file, "w", encoding="utf-8") as f:
-    f.write('''<!DOCTYPE html>
+    f.write(f'''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Photography</title>
 <style>
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
-h1 { text-align: center; padding: 20px; }
-.gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px; }
-.gallery img { width: 100%; height: 250px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.3s; }
-.gallery img:hover { transform: scale(1.05); }
-.lightbox {
+body {{ font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }}
+h1 {{ text-align: center; padding: 20px; margin-top: 70px; }}
+.gallery {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px; }}
+.gallery img {{ width: 100%; height: 250px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.3s; }}
+.gallery img:hover {{ transform: scale(1.05); }}
+.lightbox {{
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center;
   z-index: 1000; flex-direction: column;
-}
-.lightbox img {
+}}
+.lightbox img {{
   max-width: 90%; max-height: 80vh; border-radius: 10px;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-.lightbox .controls {
+}}
+.lightbox .controls {{
   margin-top: 10px; width: 100%; text-align: center;
-}
-.lightbox button {
+}}
+.lightbox button {{
   background: rgba(255,255,255,0.8);
   border: none; padding: 10px 20px; margin: 0 10px;
   font-size: 18px; cursor: pointer; border-radius: 5px;
   transition: background 0.3s;
-}
-.lightbox button:hover {
+}}
+.lightbox button:hover {{
   background: #f0a500;
   color: white;
-}
-nav {
+}}
+nav {{
   position: fixed; top: 0; left: 0; right: 0;
   background: rgba(0,0,0,0.8); height: 50px;
   display: flex; align-items: center; padding: 0 20px; z-index: 1000;
-}
-nav a {
+}}
+nav a {{
   color: white; margin-right: 25px; text-decoration: none; font-weight: bold;
   font-size: 1em; padding: 6px 10px; border-radius: 4px;
   transition: background-color 0.3s, color 0.3s;
-}
-nav a:hover, nav a:focus {
+}}
+nav a:hover, nav a:focus {{
   background-color: #f0a500; color: black;
-}
+}}
 </style>
 </head>
 <body>
 
-<nav>
-  <a href="index.html">Home</a>
-  <a href="#about">About</a>
-  <a href="photography.html">Photography</a>
-  <a href="blog.html">Blog</a>
-  <a href="reports.html">Reports</a>
-  <a href="#contact">Contact</a>
-</nav>
+{nav_content}
 
-<h1 style="margin-top:70px;">My Photography</h1>
+<h1>My Photography</h1>
 <div class="gallery">
 ''')
-
 
     for file in files:
         f.write(f'<img src="photos/{file}" alt="{file}" data-index="{files.index(file)}" onclick="showLightbox({files.index(file)})">\n')
@@ -121,7 +118,6 @@ function nextImage(event) {
   document.getElementById('lightbox-img').src = images[currentIndex];
 }
 
-// 键盘支持
 document.addEventListener('keydown', function(event) {
   if(document.getElementById('lightbox').style.display === 'flex') {
     if(event.key === 'ArrowLeft') {
@@ -133,11 +129,27 @@ document.addEventListener('keydown', function(event) {
     }
   }
 });
+
+// 平滑滚动到锚点
+document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href');
+    if(targetId === '#') return;
+    
+    const targetElement = document.querySelector(targetId);
+    if(targetElement) {
+      window.scrollTo({
+        top: targetElement.offsetTop - 60,
+        behavior: 'smooth'
+      });
+    }
+  });
+});
 </script>
 
 </body>
 </html>
 ''')
 
-print("✅ photography.html with slider generated successfully!")
-
+print("✅ photography.html with working navigation generated successfully!")
