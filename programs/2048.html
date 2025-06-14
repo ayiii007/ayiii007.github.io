@@ -2,61 +2,74 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Nuclear Fusion 2048</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
             text-align: center; 
-            margin-top: 30px; 
+            margin: 0;
+            padding: 10px;
             background-color: #faf8ef;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         h1 {
-            font-size: 40px;
+            font-size: 28px;
             color: #776e65;
             margin-bottom: 10px;
         }
         .container {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            max-width: 800px;
+            flex-direction: column;
+            align-items: center;
+            max-width: 100%;
             margin: 0 auto;
         }
         .game-area {
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
         #grid { 
-            width: 400px; 
-            height: 400px; 
+            width: calc(100vw - 40px);
+            max-width: 400px;
             margin: 10px auto; 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            grid-gap: 5px; 
+            grid-template-rows: repeat(4, 1fr);
+            gap: 5px; 
             background-color: #bbada0;
             padding: 10px;
             border-radius: 6px;
+            touch-action: none;
+            aspect-ratio: 1/1;
+            box-sizing: border-box;
         }
         .cell { 
-            width: 90px; 
-            height: 90px; 
+            position: relative;
             background: #cdc1b4; 
             border-radius: 3px; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
         }
+        .cell::before {
+            content: "";
+            display: block;
+            padding-top: 100%;
+        }
         .element { 
-            width: 85px; 
-            height: 85px; 
+            position: absolute;
+            width: 90%; 
+            height: 90%; 
             border-radius: 5px; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
             align-items: center; 
             font-weight: bold;
-            position: relative;
         }
         .mass-number {
             position: absolute;
@@ -79,31 +92,38 @@
         .score-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 10px;
             margin-bottom: 10px;
+            width: 100%;
+            max-width: 400px;
         }
         .score-box {
             background: #bbada0;
             color: white;
-            padding: 10px 15px;
+            padding: 8px 12px;
             border-radius: 5px;
             font-weight: bold;
-            min-width: 100px;
+            min-width: 0;
+            flex: 1;
         }
         .score-title {
             font-size: 13px;
         }
         .score-value {
-            font-size: 20px;
+            font-size: 18px;
         }
         #current-equation {
             margin: 10px 0;
-            padding: 10px;
+            padding: 8px;
             background: #bbada0;
             color: white;
             border-radius: 5px;
             min-height: 20px;
             font-weight: bold;
+            width: calc(100vw - 40px);
+            max-width: 400px;
+            font-size: 14px;
+            box-sizing: border-box;
         }
         #game-over { 
             display: none; 
@@ -114,42 +134,47 @@
             bottom: 0; 
             background: rgba(0,0,0,0.7); 
             color: white; 
-            font-size: 40px; 
+            font-size: 28px; 
             justify-content: center; 
             align-items: center; 
             flex-direction: column;
+            z-index: 100;
         }
         button {
             background: #8f7a66;
             border-radius: 3px;
-            padding: 10px 20px;
+            padding: 12px 20px;
             color: white;
             border: none;
             font-weight: bold;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
             margin-top: 10px;
+            min-width: 120px;
         }
         .equation-sidebar {
-            width: 250px;
+            width: calc(100vw - 40px);
+            max-width: 400px;
             padding: 15px;
             background-color: #bbada0;
             border-radius: 6px;
             color: white;
             text-align: left;
+            margin-top: 15px;
+            font-size: 14px;
+            box-sizing: border-box;
         }
         .equation-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             margin-bottom: 10px;
             border-bottom: 2px solid white;
             padding-bottom: 5px;
         }
         .equation-item {
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 6px;
+            font-size: 13px;
         }
-        /* 不稳定性震动动画 */
         @keyframes unstable {
             0% { transform: rotate(-1deg); }
             25% { transform: rotate(1deg); }
@@ -176,31 +201,100 @@
             color: white;
             padding: 20px;
             border-radius: 10px;
-            z-index: 100;
+            z-index: 200;
             text-align: center;
-            max-width: 500px;
-            width: 80%;
+            width: 85%;
+            max-width: 400px;
+            box-sizing: border-box;
         }
         #instructions {
             text-align: left;
-            line-height: 1.6;
+            line-height: 1.5;
+            max-height: 80vh;
+            overflow-y: auto;
         }
         #instructions h2 {
             text-align: center;
             margin-bottom: 15px;
             color: #ffeb3b;
+            font-size: 20px;
+        }
+        #instructions h3 {
+            font-size: 16px;
+            margin: 15px 0 8px 0;
+            color: #ffcc80;
         }
         #instructions ul {
             padding-left: 20px;
+            margin: 8px 0;
         }
         #instructions li {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+        #instructions p {
+            margin: 8px 0;
         }
         .button-group {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-top: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .swipe-area {
+            display: none;
+            width: calc(100vw - 40px);
+            max-width: 400px;
+            margin: 15px auto;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            height: 150px;
+        }
+        .swipe-area div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+        .swipe-up, .swipe-down, .swipe-left, .swipe-right {
+            background-color: rgba(143, 122, 102, 0.3);
+            border-radius: 5px;
+        }
+        
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+                max-width: 800px;
+            }
+            .equation-sidebar {
+                margin-top: 0;
+                margin-left: 20px;
+                width: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+            .score-box {
+                padding: 6px 10px;
+            }
+            .score-title {
+                font-size: 12px;
+            }
+            .score-value {
+                font-size: 16px;
+            }
+            button {
+                padding: 10px 16px;
+                font-size: 15px;
+                min-width: 100px;
+            }
+            .swipe-area {
+                display: grid;
+            }
         }
     </style>
 </head>
@@ -224,11 +318,24 @@
         <div id="current-equation">use the arrow keys or WASD to move the elements</div>
         
         <div id="grid"></div>
+        
+        <div class="swipe-area">
+            <div></div>
+            <div class="swipe-up">↑</div>
+            <div></div>
+            <div class="swipe-left">←</div>
+            <div></div>
+            <div class="swipe-right">→</div>
+            <div></div>
+            <div class="swipe-down">↓</div>
+            <div></div>
+        </div>
+        
         <div class="button-group">
             <button id="new-game-btn">new game</button>
             <button id="instructions-btn">instructions</button>
         </div>
-        <div class="controls">control: ↑↓←→ or WASD</div>
+        <div class="controls">control: ↑↓←→ or WASD or swipe</div>
     </div>
     
     <div class="equation-sidebar">
@@ -275,11 +382,11 @@
     <h2>Nuclear Fusion 2048 - Game Instructions</h2>
     
     <h3>Objective</h3>
-    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the element ⁵⁶Fe before the grid fills up.</p>
+    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the heaviest element possible (⁵⁶Ni) before the grid fills up.</p>
     
     <h3>How to Play</h3>
     <ul>
-        <li><strong>Move elements</strong> using arrow keys or WASD</li>
+        <li><strong>Move elements</strong> using arrow keys (on desktop) or swipe gestures (on mobile)</li>
         <li><strong>Combine adjacent elements</strong> according to the fusion equations shown in the sidebar</li>
         <li>When two combinable elements merge, they create a new heavier element and you earn points</li>
         <li>Some unstable elements will decay over time into lighter elements</li>
@@ -303,6 +410,8 @@
         <li>Keep an eye on unstable elements - they might decay before you can use them</li>
         <li>Try to avoid creating ²⁴Mg because it is of no use in creating ⁵⁶Fe</li>
     </ul>
+    
+    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the element ⁵⁶Fe before the grid fills up.</p>
     
     <div style="text-align: center; margin-top: 20px;">
         <button id="close-instructions">Got it!</button>
@@ -399,7 +508,9 @@
         score: 0,
         highScore: localStorage.getItem('highScore') || 0,
         gameOver: false,
-        decayed: false
+        decayed: false,
+        touchStartX: 0,
+        touchStartY: 0
     };
 
     // 初始化游戏
@@ -415,7 +526,7 @@
 
         updateView();
         document.getElementById('game-over').style.display = 'none';
-        document.getElementById('current-equation').textContent = "use direction keys or WASD to move elements";
+        document.getElementById('current-equation').textContent = "Swipe or use arrow keys to move elements";
     }
 
     // 添加随机元素
@@ -729,6 +840,41 @@
         return false;
     }
 
+    // 处理触摸事件
+    function handleTouchStart(e) {
+        gameState.touchStartX = e.touches[0].clientX;
+        gameState.touchStartY = e.touches[0].clientY;
+    }
+
+    function handleTouchEnd(e) {
+        if (!gameState.touchStartX || !gameState.touchStartY) return;
+        
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        
+        const dx = touchEndX - gameState.touchStartX;
+        const dy = touchEndY - gameState.touchStartY;
+        
+        // 重置触摸起点
+        gameState.touchStartX = 0;
+        gameState.touchStartY = 0;
+        
+        // 确定滑动方向
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 50) {
+                move('right');
+            } else if (dx < -50) {
+                move('left');
+            }
+        } else {
+            if (dy > 50) {
+                move('down');
+            } else if (dy < -50) {
+                move('up');
+            }
+        }
+    }
+
     // 初始化事件监听
     document.addEventListener('DOMContentLoaded', () => {
         initGame();
@@ -757,6 +903,10 @@
                 if (key === 'arrowdown' || key === 's') move('down');
             }
         });
+        
+        // 触摸控制
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
     });
 </script>
 </body>
