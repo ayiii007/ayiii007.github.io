@@ -15,6 +15,7 @@ body {
   font-family: 'Arial', sans-serif;
   user-select:none;
   padding-bottom: 100px;
+  touch-action: manipulation;
 }
 canvas {
   background: #fff;
@@ -65,12 +66,64 @@ button:hover {
   position: relative;
   z-index: 1;
 }
+.controls {
+  display: none;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 420px;
+}
+.control-row {
+  display: flex;
+  justify-content: center;
+}
+.control-btn {
+  width: 80px;
+  height: 80px;
+  margin: 5px;
+  background-color: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  color: white;
+  user-select: none;
+}
+@media (max-width: 768px) {
+  .controls {
+    display: block;
+  }
+  #instructions {
+    font-size: 0.9em;
+  }
+}
+#instructions {
+  margin-top: 15px;
+  color: #ccc;
+  text-align: center;
+  max-width: 420px;
+}
 </style>
 </head>
 <body>
 
 <h1>Snake Game</h1>
 <canvas id="game" width="420" height="420"></canvas>
+
+<div class="controls">
+  <div class="control-row">
+    <div class="control-btn" id="up-btn">↑</div>
+  </div>
+  <div class="control-row">
+    <div class="control-btn" id="left-btn">←</div>
+    <div class="control-btn" id="down-btn">↓</div>
+    <div class="control-btn" id="right-btn">→</div>
+  </div>
+</div>
+
+<div id="instructions">
+  Use WASD keys or touch controls to play
+</div>
 
 <a href="micro_program.zip" class="download-link" download>Download ZIP</a>
 
@@ -81,7 +134,7 @@ button:hover {
     <button data-speed="60" data-monsters="9" data-reverse="false">Moderate</button>
     <button data-speed="30" data-monsters="11" data-reverse="false">Difficult</button>
     <button data-speed="90" data-monsters="14" data-reverse="true" style="background:black;color:white;">Hell (Reverse)</button>
-    <p style="margin-top:15px; font-size:0.9em; color:#ccc;">Use WASD keys</p>
+    <p style="margin-top:15px; font-size:0.9em; color:#ccc;">Use WASD keys or touch controls</p>
   </div>
 </div>
 
@@ -108,11 +161,19 @@ button:hover {
   let speed = 60;
   let reverse = false;
   let timerId = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
 
   const overlay = document.getElementById('overlay');
   const gameoverDiv = document.getElementById('gameover');
   const restartBtn = document.getElementById('restart-btn');
   const stopBtn = document.getElementById('stop-btn');
+
+  // Touch control buttons
+  const upBtn = document.getElementById('up-btn');
+  const downBtn = document.getElementById('down-btn');
+  const leftBtn = document.getElementById('left-btn');
+  const rightBtn = document.getElementById('right-btn');
 
   function initSnake() {
     snake = [];
@@ -228,6 +289,12 @@ button:hover {
     timerId = setTimeout(gameLoop, speed);
   }
 
+  function changeDirection(newDx, newDy) {
+    if(dx !== -newDx || dy !== -newDy) {
+      dx = newDx; dy = newDy;
+    }
+  }
+
   function handleKeyDown(e) {
     const key = e.key.toLowerCase();
     const normalMapping = {w:[0,-1], s:[0,1], a:[-1,0], d:[1,0]};
@@ -235,11 +302,50 @@ button:hover {
     let mapping = reverse ? reverseMapping : normalMapping;
     if(key in mapping) {
       const [newDx, newDy] = mapping[key];
-      if(dx !== -newDx || dy !== -newDy) {
-        dx = newDx; dy = newDy;
+      changeDirection(newDx, newDy);
+    }
+  }
+
+  function handleTouchStart(e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    e.preventDefault();
+  }
+
+  function handleTouchEnd(e) {
+    if (!touchStartX || !touchStartY) return;
+    
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+    
+    // Reset touch start position
+    touchStartX = 0;
+    touchStartY = 0;
+    
+    // Determine swipe direction
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 50) {
+        changeDirection(reverse ? -1 : 1, 0); // Right
+      } else if (dx < -50) {
+        changeDirection(reverse ? 1 : -1, 0); // Left
+      }
+    } else {
+      if (dy > 50) {
+        changeDirection(0, reverse ? -1 : 1); // Down
+      } else if (dy < -50) {
+        changeDirection(0, reverse ? 1 : -1); // Up
       }
     }
   }
+
+  // Setup control buttons
+  upBtn.addEventListener('click', () => changeDirection(0, reverse ? 1 : -1));
+  downBtn.addEventListener('click', () => changeDirection(0, reverse ? -1 : 1));
+  leftBtn.addEventListener('click', () => changeDirection(reverse ? 1 : -1, 0));
+  rightBtn.addEventListener('click', () => changeDirection(reverse ? -1 : 1, 0));
 
   overlay.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -260,7 +366,10 @@ button:hover {
     overlay.style.display = 'flex';
   };
 
+  // Event listeners
   window.addEventListener('keydown', handleKeyDown);
+  canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+  canvas.addEventListener('touchend', handleTouchEnd, { passive: true });
 
   ctx.font = '20px Arial';
   ctx.fillStyle = 'white';

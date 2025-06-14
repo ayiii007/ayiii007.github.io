@@ -13,7 +13,7 @@
             background-color: #faf8ef;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-        }
+        } 
         h1 {
             font-size: 28px;
             color: #776e65;
@@ -382,7 +382,7 @@
     <h2>Nuclear Fusion 2048 - Game Instructions</h2>
     
     <h3>Objective</h3>
-    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the heaviest element possible (⁵⁶Ni) before the grid fills up.</p>
+    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the element ⁵⁶Fe before the grid fills up.</p>
     
     <h3>How to Play</h3>
     <ul>
@@ -410,8 +410,6 @@
         <li>Keep an eye on unstable elements - they might decay before you can use them</li>
         <li>Try to avoid creating ²⁴Mg because it is of no use in creating ⁵⁶Fe</li>
     </ul>
-    
-    <p>Combine lighter elements through nuclear fusion to create heavier elements, just like in stars! Your goal is to reach the element ⁵⁶Fe before the grid fills up.</p>
     
     <div style="text-align: center; margin-top: 20px;">
         <button id="close-instructions">Got it!</button>
@@ -445,7 +443,7 @@
     // 可衰变元素类型
     const decayableElements = [4, 5, 8, 16, 17]; // ⁷Be, ⁸Be, ²⁰Ne, ⁵²Fe, ⁵⁶Ni
 
-    // 聚变反应方程 (完全按照图片中的方程)
+    // 聚变反应方程
     const fusionReactions = {
         // ²H = ¹H + ¹H (反向反应)
         '0-0': 1,    // ¹H + ¹H → ²H
@@ -910,4 +908,4 @@
     });
 </script>
 </body>
-</html>
+</html>、
